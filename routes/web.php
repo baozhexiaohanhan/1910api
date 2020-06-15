@@ -14,5 +14,5 @@
 Route::get('/', function () {
     return view('welcome');
 });
-//jsdjdj
-//孙洁孙洁就
+
+Route::get('/test/hello','TestController@hello');
