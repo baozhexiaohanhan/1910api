@@ -16,4 +16,7 @@ class GoodsController extends Controller
         $info=GoodsModel::find($goods_id);  //find查找主键
         echo '<pre>';print_r($info);echo '</pre>';
     }
+    public function denglu(){
+        echo 123;
+    }
 }

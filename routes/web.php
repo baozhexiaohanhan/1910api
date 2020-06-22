@@ -16,6 +16,14 @@ Route::get('/', function () {
 });
 
 Route::get('/test/hello','TestController@hello');
+Route::get('/test/redis1','TestController@redis1');
+
 //商品
 Route::get('/goods/detail','Goods\GoodsController@detail');//商品详情
+Route::get('/goods/denglu','Goods\GoodsController@denglu');//商品详情
 
+
+Route::get('/user/reg','User\IndexController@reg');
+Route::post('/user/regDo','User\IndexController@regDo');
+Route::get('/user/login','User\IndexController@login');
+Route::post('/user/loginDo','User\IndexController@loginDo');
