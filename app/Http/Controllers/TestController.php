@@ -18,4 +18,13 @@ class TestController extends Controller
        echo '代码没爹';
 
      }
+
+     public function test1(){
+         $data = [
+             'name' =>'zhangsan',
+             'email'=>'3238811454@qq.com'
+         ];
+         return $data;
+//         echo json_encode($data);
+     }
 }

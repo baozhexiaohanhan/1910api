@@ -5,6 +5,8 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Model\UserModel;
+use Illuminate\Support\Facades\Cookie;
+
 class IndexController extends Controller
 {
     public function reg(Request $request){
@@ -56,20 +58,41 @@ class IndexController extends Controller
     public function loginDo(Request $request){
         $user_name = $request->input('user_name');
         $password = $request->input('password');
-        echo '用户输入密码:'.$password;echo '</br>';
+//        echo '用户输入密码:'.$password;echo '</br>';
         //验证登录信息
         $u = UserModel::where(['user_name'=>$user_name])->first();
-        echo '数据库密码：'.$u->password;echo '</br>';
+//        echo '数据库密码：'.$u->password;echo '</br>';
 
         //验证密码
         $res = password_verify($password,$u->password);
         if($res){
-            return redirect('user/');
-            echo "登录 成功";
+            //客户端设置cookie
+//            setcookie('uid',$u->user_id,time()+3600,'/');
+//            setcookie('name',$u->user_name,time()+3600,'/');
+            Cookie::queue('uid',$u->user_id,60);
+            Cookie::queue('name',$u->user_name,60);
+            echo "登录成功";
+            header('Refresh:2;url=/user/center');
         }else{
-            return redirect('user/login');
-            echo "用户与密码不一致";
+            echo "用户与密码不一致，请重新登录";
+            header('Refresh:2;url=/user/login');
         }
 
     }
+    public function center()
+    {
+        //判断用户是否登录 ,判断是否有 uid 字段
+
+        if(Cookie::has('uid'))
+        {
+            //已登录
+            return view('user.center');
+        }else{
+            //未登录
+            return redirect('/user/login');
+        }
+
+    }
+
+
 }
