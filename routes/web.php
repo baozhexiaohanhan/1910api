@@ -30,3 +30,6 @@ Route::post('/user/regDo','User\IndexController@regDo');
 Route::get('/user/login','User\IndexController@login');
 Route::post('/user/loginDo','User\IndexController@loginDo');
 Route::get('/user/center','User\IndexController@center');  //用户中心
+
+//APi
+Route::post('/api/user/reg','Api\UserController@reg');//注册接口
