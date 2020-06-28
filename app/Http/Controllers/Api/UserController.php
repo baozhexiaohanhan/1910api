@@ -4,13 +4,12 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Model\UserModel;
-use App\Model\TokenModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
-
+use App\Model\TokenModel;
+use Illuminate\Support\Facades\Redis;
 class UserController extends Controller
 {
-    //注册接口
     public function reg(Request $request){
         $user_name=$request->input('user_name');
         $email = $request->input('email');
@@ -19,35 +18,34 @@ class UserController extends Controller
         //验证密码不能大于6位
         $len = strlen($password);
         if($len<6){
-            $response = [
-                'erron'=>500,
-                'msg'=>'密码不能小于6位'
+            $response= [
+                'error' => 50001,
+                'msg' => '密码不能小于6位'
             ];
             return $response;
         }
         //2次密码必须一致
         if($password !=$passwordker){
-            $response = [
-                'erron'=>5001,
-                'msg'=>'密码不一致'
+            $response= [
+                'error' => 50002,
+                'msg' => '密码不一致'
             ];
             return $response;
         }
         //用户是否存在
-
         $a=UserModel::where(['user_name'=>$user_name])->first();
         if($a){
-            $response = [
-                'errno'  => 5002,
-                'msg'    => " 用户名已存在"
+            $response= [
+                'error' => 50003,
+                'msg' => $user_name."用户已存在"
             ];
             return $response;
         }
         $a=UserModel::where(['email'=>$email])->first();
         if($a){
-            $response = [
-                'errno'  => 5003,
-                'msg'    => " Email已存在"
+            $response= [
+                'error' => 50004,
+                'msg' => $email."email已存在"
             ];
             return $response;
         }
@@ -62,22 +60,12 @@ class UserController extends Controller
         $res = UserModel::insert($data);
         if($res)
         {
-            $response = [
-                'errno'  => 0,
-                'msg'    => "注册成功"
-            ];
-
+            //echo "注册成功";
+            return redirect('user/login');
         }else{
-            $response = [
-                'errno'  => 5004,
-                'msg'    => "注册失败"
-            ];
+            echo "注册失败";
         }
-
-        return $response;
     }
-
-    //登录
     public function login(Request $request){
         $user_name = $request->input('user_name');
         $password = $request->input('password');
@@ -91,43 +79,90 @@ class UserController extends Controller
         if($res){
             //生成token
             $str = $u->user_id . $u->user_name . time();
-            $token = substr(md5($str),10,16) . substr(md5($str),0,18);
-            //保存token，后验证使用
-            $data = [
-                'uid'=>$u->user_id,
-                'token'=>$token
-            ];
-            TokenModel::insert($data);
-            $response = [
-                'errno'=>0,
-                'msg'=>'ok',
+            $token = substr(md5($str),10,16);
+            //保存token
+//            $data = [
+//                'uid'=>$u->user_id,
+//                'token'=>$token
+//            ];
+//            TokenModel::insert($data);
+            Redis::set($token,$u->user_id);
+            $response= [
+                'errno' => 0,
+                'msg' => 'ok',
                 'token'=>$token
             ];
         }else{
-            $response =[
-                'errno'=>5005,
-                'msg'=>'用户与密码不一致，请重新登录',
+            $response= [
+                'errno' => 50006,
+                'msg' => '用户与密码不一致，请重新登录'
             ];
         }
         return $response;
-        //d501360a7ed9f591
     }
-    public function center()
+    //个人中心
+    public function center(Request $request)
     {
-        //判断用户是否登录 ,判断是否有 uid 字段
-        $token = $_GET['token'];
-        //检查token是否有效
-        $res = TokenModel::where(['token'=>$token])->first();
-        if($res)
+
+        $token = $request->input('token');
+        $uid = Redis::get($token);
+
+        if($uid)
         {
-            $uid = $res->uid;
-            $user_info =UserModel::find($uid);
+            $user_info = UserModel::find($uid);
             //已登录
-            echo $user_info->user_name."欢迎来到个人中心";
+            echo $user_info->user_name . " 欢迎来到个人中心";
         }else{
             //未登录
-            echo "请登录";
+            $response = [
+                'errno' => 50008,
+                'msg'   => '请先登录'
+            ];
+            return $response;
         }
+
+    }
+    //订单
+    public function orders()
+    {
+
+        //订单信息
+        $arr = [
+            '0345830953454345354',
+            '9875830953454556354',
+            '1235830953454345354',
+            '2345830953454345354',
+            '5675830953454345354',
+        ];
+
+
+        $response = [
+            'errno' => 0,
+            'msg'   => 'ok',
+            'data'  => [
+                'orders'    => $arr
+            ]
+        ];
+
+        return $response;
+    }
+    //购物车
+    public function cart()
+    {
+
+        $goods = [
+            123,
+            456,
+            789
+        ];
+
+        $response = [
+            'errno' => 0,
+            'msg'   => 'ok',
+            'data'  => $goods
+        ];
+
+        return $response;
 
     }
 

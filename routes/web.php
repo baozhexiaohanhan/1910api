@@ -34,6 +34,9 @@ Route::get('/user/center','User\IndexController@center');  //用户中心
 //APi
 Route::post('/api/user/reg','Api\UserController@reg');//注册接口
 Route::post('/api/user/login','Api\UserController@login');//登录接口
-Route::get('/api/user/center','Api\UserController@center');//个人接口
+Route::get('/api/user/center','Api\UserController@center')->middleware('check.pri');;//个人接口
+Route::get('/api/my/orders','Api\UserController@orders')->middleware('check.pri');//订单
+Route::get('/api/my/cart','Api\UserController@cart')->middleware('check.pri');//订单
+
 
 
